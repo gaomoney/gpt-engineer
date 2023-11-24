@@ -83,7 +83,7 @@ def main(
     model: str = typer.Argument("gpt-4", help="model id string"),
     temperature: float = 0.1,
     steps_config: StepsConfig = typer.Option(
-        StepsConfig.DEFAULT, "--steps", "-s", help="decide which steps to run"
+        StepsConfig.BENCHMARK, "--steps", "-s", help="decide which steps to run"
     ),
     improve_mode: bool = typer.Option(
         False,
@@ -163,7 +163,8 @@ def main(
         logs=FileRepository(memory_path / "logs"),
         input=FileRepository(input_path),
         workspace=FileRepository(workspace_path),
-        preprompts=FileRepository(preprompts_path(use_custom_preprompts, input_path)),
+        preprompts=FileRepository(preprompts_path(
+            use_custom_preprompts, input_path)),
         archive=FileRepository(archive_path),
         project_metadata=FileRepository(project_metadata_path),
     )
