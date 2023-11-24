@@ -43,8 +43,7 @@ class PAI(AI):
     def __init__(self, model_name: str = "GPT-4", temperature=0.1, poe_endpoint: str = "https://api.poe.com/bot/"):
         self.temperature = temperature
         self.poe_endpoint = poe_endpoint
-        self.model_name = check
-        pass
+        self.model_name = self._check_model_access_and_fallback(model_name)
 
     def _check_model_access_and_fallback(self, model_name) -> str:
         """
