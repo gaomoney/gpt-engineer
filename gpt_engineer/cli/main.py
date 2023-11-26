@@ -35,6 +35,7 @@ from dotenv import load_dotenv
 
 from gpt_engineer.data.file_repository import FileRepository, FileRepositories, archive
 from gpt_engineer.core.ai import AI
+from gpt_engineer.core.ai_poe import PAI
 from gpt_engineer.core.steps import STEPS, Config as StepsConfig
 from gpt_engineer.cli.collect import collect_learnings
 from gpt_engineer.cli.learning import check_collection_consent
@@ -83,7 +84,7 @@ def main(
     model: str = typer.Argument("gpt-4", help="model id string"),
     temperature: float = 0.1,
     steps_config: StepsConfig = typer.Option(
-        StepsConfig.BENCHMARK, "--steps", "-s", help="decide which steps to run"
+        StepsConfig.DEFAULT, "--steps", "-s", help="decide which steps to run"
     ),
     improve_mode: bool = typer.Option(
         False,
@@ -139,11 +140,12 @@ def main(
 
     load_env_if_needed()
 
-    ai = AI(
-        model_name=model,
-        temperature=temperature,
-        azure_endpoint=azure_endpoint,
-    )
+    # ai = AI(
+    #     model_name=model,
+    #     temperature=temperature,
+    #     azure_endpoint=azure_endpoint,
+    # )
+    ai = PAI(model_name=model, temperature=temperature)
 
     project_path = os.path.abspath(
         project_path
