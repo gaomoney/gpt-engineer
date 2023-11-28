@@ -43,14 +43,24 @@ from gpt_engineer.data.code_vector_repository import CodeVectorRepository
 
 app = typer.Typer()  # creates a CLI app
 
+GLOBAL_ENV = None
+
 
 def load_env_if_needed():
+    global GLOBAL_ENV
     if os.getenv("OPENAI_API_KEY") is None:
         load_dotenv()
     if os.getenv("OPENAI_API_KEY") is None:
         # if there is no .env file, try to load from the current working directory
         load_dotenv(dotenv_path=os.path.join(os.getcwd(), ".env"))
-    openai.api_key = os.getenv("OPENAI_API_KEY")
+    if os.getenv("OPENAI_API_KEY") is not None:
+        # if there is no .env file, try to load from the parent directory
+        openai.api_key = os.getenv("OPENAI_API_KEY")
+        GLOBAL_ENV = "openai"
+    if os.getenv("POE_ACCESS_KEY") is not None:
+        # if there is no .env file, try to load from the parent directory
+        openai.api_key = os.getenv("POE_ACCESS_KEY")
+        GLOBAL_ENV = "poe"
 
 
 def load_prompt(dbs: FileRepositories):
@@ -81,7 +91,8 @@ def preprompts_path(use_custom_preprompts: bool, input_path: Path = None) -> Pat
 @app.command()
 def main(
     project_path: str = typer.Argument("projects/example", help="path"),
-    model: str = typer.Argument("gpt-4", help="model id string"),
+    # model: str = typer.Argument("gpt-4", help="model id string"),
+    model: str = typer.Argument("gpt-3.5-turbo", help="model id string"),
     temperature: float = 0.1,
     steps_config: StepsConfig = typer.Option(
         StepsConfig.DEFAULT, "--steps", "-s", help="decide which steps to run"
@@ -139,13 +150,19 @@ def main(
         steps_config = StepsConfig.VECTOR_IMPROVE
 
     load_env_if_needed()
+    ai = None
+    print(f"Current agent: {GLOBAL_ENV}")
+    if GLOBAL_ENV == "openai":
 
-    # ai = AI(
-    #     model_name=model,
-    #     temperature=temperature,
-    #     azure_endpoint=azure_endpoint,
-    # )
-    ai = PAI(model_name=model, temperature=temperature)
+        ai = AI(
+            model_name=model,
+            temperature=temperature,
+            azure_endpoint=azure_endpoint,
+        )
+    elif GLOBAL_ENV == "poe":
+        ai = PAI(model_name=model, temperature=temperature)
+    else:
+        raise ValueError("NO available API key found")
 
     project_path = os.path.abspath(
         project_path
@@ -189,7 +206,8 @@ def main(
         messages = step(ai, fileRepositories)
         fileRepositories.logs[step.__name__] = AI.serialize_messages(messages)
 
-    print("Total api cost: $ ", ai.token_usage_log.usage_cost())
+    if GLOBAL_ENV == "openai":
+        print("Total api cost: $ ", ai.token_usage_log.usage_cost())
 
     if check_collection_consent():
         collect_learnings(model, temperature, steps, fileRepositories)

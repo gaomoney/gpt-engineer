@@ -269,11 +269,13 @@ async def model(
     for message in messages:
         # if message.
         if message.type == "system":
-            poe_messages.append(protocol.SystemMessage(content=message.content))
+            poe_messages.append(
+                protocol.SystemMessage(content=message.content))
         if message.type == "human":
             poe_messages.append(protocol.HumanMessage(content=message.content))
         if message.type == "ai":
             poe_messages.append(protocol.AIMessage(content=message.content))
+    logging.debug(f"Sending messages to POE LLM: {poe_messages}")
     outputs = []
     async for msg in ai.chat(poe_messages):
         msg_text = ""
