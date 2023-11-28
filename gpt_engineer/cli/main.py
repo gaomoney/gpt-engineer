@@ -91,7 +91,9 @@ def preprompts_path(use_custom_preprompts: bool, input_path: Path = None) -> Pat
 @app.command()
 def main(
     project_path: str = typer.Argument("projects/example", help="path"),
-    model: str = typer.Argument("gpt-3.5-turbo", help="model id string"),
+    model: str = typer.Argument("gpt-3.5-turbo", help="""model id string, Available models: 
+                                gpt-4, gpt-3.5-turbo, GPT-4, GPT-4-32k, GPT-3.5-turbo, ChatGPT-16k, Claude-2-100k
+                                Claude-instant-100k, StableDiffusionXL"""),
     temperature: float = 0.1,
     steps_config: StepsConfig = typer.Option(
         StepsConfig.BENCHMARK, "--steps", "-s", help="decide which steps to run"),
