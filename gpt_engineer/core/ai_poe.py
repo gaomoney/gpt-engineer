@@ -34,11 +34,9 @@ from langchain.schema import (
     HumanMessage,
     SystemMessage,
     messages_to_dict,
-    messages_from_dict
+    messages_from_dict,
 )
-from langchain.callbacks.manager import (
-    Callbacks
-)
+from langchain.callbacks.manager import Callbacks
 from gpt_engineer.core.ai import AI
 from gpt_engineer.core.token_usage import TokenUsageLog
 
@@ -57,8 +55,12 @@ class PAI(AI):
         AI (_type_): AI interface
     """
 
-    def __init__(self, model_name: str = "GPT-4",
-                 temperature=0.1, poe_endpoint: str = "https://api.poe.com/bot/"):
+    def __init__(
+        self,
+        model_name: str = "GPT-4",
+        temperature=0.1,
+        poe_endpoint: str = "https://api.poe.com/bot/",
+    ):
         self.temperature = temperature
         self.poe_endpoint = poe_endpoint
         self.model_name = self._check_model_access_and_fallback(model_name)
@@ -210,9 +212,8 @@ class PAI(AI):
         api_key = os.environ.get("POE_ACCESS_KEY")
         assert api_key is not None, "POE_ACCESS_KEY environment variable not set"
         poe_ai = PoeAI(
-            model=self.model_name,
-            temperature=self.temperature,
-            api_key=api_key)
+            model=self.model_name, temperature=self.temperature, api_key=api_key
+        )
 
         def sync_model(messages: List[Message], callbacks: List[Callbacks]) -> Message:
             return asyncio_run(model(poe_ai, messages, callbacks=callbacks))
@@ -261,16 +262,13 @@ class PAI(AI):
 
 
 async def model(
-        ai: PoeAI,
-        messages: List[Message],
-        callbacks: List[Callbacks] = None,
-        **kwargs):
+    ai: PoeAI, messages: List[Message], callbacks: List[Callbacks] = None, **kwargs
+):
     poe_messages = []
     for message in messages:
         # if message.
         if message.type == "system":
-            poe_messages.append(
-                protocol.SystemMessage(content=message.content))
+            poe_messages.append(protocol.SystemMessage(content=message.content))
         if message.type == "human":
             poe_messages.append(protocol.HumanMessage(content=message.content))
         if message.type == "ai":
