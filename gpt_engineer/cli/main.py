@@ -91,12 +91,10 @@ def preprompts_path(use_custom_preprompts: bool, input_path: Path = None) -> Pat
 @app.command()
 def main(
     project_path: str = typer.Argument("projects/example", help="path"),
-    # model: str = typer.Argument("gpt-4", help="model id string"),
     model: str = typer.Argument("gpt-3.5-turbo", help="model id string"),
     temperature: float = 0.1,
     steps_config: StepsConfig = typer.Option(
-        StepsConfig.DEFAULT, "--steps", "-s", help="decide which steps to run"
-    ),
+        StepsConfig.BENCHMARK, "--steps", "-s", help="decide which steps to run"),
     improve_mode: bool = typer.Option(
         False,
         "--improve",
@@ -148,12 +146,9 @@ def main(
             steps_config == StepsConfig.DEFAULT
         ), "Vector improve mode not compatible with other step configs"
         steps_config = StepsConfig.VECTOR_IMPROVE
-
     load_env_if_needed()
-    ai = None
     print(f"Current agent: {GLOBAL_ENV}")
     if GLOBAL_ENV == "openai":
-
         ai = AI(
             model_name=model,
             temperature=temperature,
@@ -163,16 +158,13 @@ def main(
         ai = PAI(model_name=model, temperature=temperature)
     else:
         raise ValueError("NO available API key found")
-
     project_path = os.path.abspath(
         project_path
     )  # resolve the string to a valid path (eg "a/b/../c" to "a/c")
     path = Path(project_path).absolute()
     print("Running gpt-engineer in", path, "\n")
-
     workspace_path = path
     input_path = path
-
     project_metadata_path = path / ".gpteng"
     memory_path = project_metadata_path / "memory"
     archive_path = project_metadata_path / "archive"
@@ -187,9 +179,7 @@ def main(
         archive=FileRepository(archive_path),
         project_metadata=FileRepository(project_metadata_path),
     )
-
     codeVectorRepository = CodeVectorRepository()
-
     if steps_config not in [
         StepsConfig.EXECUTE_ONLY,
         StepsConfig.USE_FEEDBACK,
